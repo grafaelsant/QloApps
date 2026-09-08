@@ -126,6 +126,17 @@ class AdminVisualInspectionController extends ModuleAdminController
                             } else {
                                 $itemError = $this->l('Métricas indisponíveis (Serviço local offline).');
                             }
+
+                            // Save evidence file permanently and persist in database
+                            $savedImagePath = $this->saveEvidenceImage($tmpFilePath, $subInspectionId, $mimeType);
+                            $this->saveInspectionRecord(
+                                $subInspectionId,
+                                $selectedRoomId,
+                                $itemKey,
+                                $itemConfig['title'],
+                                $savedImagePath,
+                                $itemResult
+                            );
                         }
                     }
                 }
@@ -150,11 +161,118 @@ class AdminVisualInspectionController extends ModuleAdminController
             'inspectionError'   => $errorMessage,
             'selectedRoomId'    => $selectedRoomId,
             'roomsList'         => $this->getHotelRoomsList(),
+            'recentInspections' => $this->getRecentInspections(),
+            'moduleImgUri'      => __PS_BASE_URI__ . 'modules/' . $this->module->name . '/views/img/inspections/',
         ]);
 
         $this->template = 'content.tpl';
         $this->content .= $this->context->smarty->fetch($this->getTemplatePath() . 'inspection_form.tpl');
         $this->context->smarty->assign('content', $this->content);
+    }
+
+    /**
+     * Persist uploaded image file to module storage directory
+     *
+     * @param string $tmpPath
+     * @param string $subInspectionId
+     * @param string $mimeType
+     * @return string
+     */
+    protected function saveEvidenceImage($tmpPath, $subInspectionId, $mimeType)
+    {
+        $ext = ($mimeType === 'image/png' || $mimeType === 'image/x-png') ? 'png' : 'jpg';
+        $filename = $subInspectionId . '.' . $ext;
+        $targetDir = _PS_MODULE_DIR_ . $this->module->name . '/views/img/inspections/';
+
+        if (!is_dir($targetDir)) {
+            @mkdir($targetDir, 0755, true);
+        }
+
+        $targetPath = $targetDir . $filename;
+        @copy($tmpPath, $targetPath);
+
+        return $filename;
+    }
+
+    /**
+     * Insert inspection record into qlo_visual_inspection table
+     *
+     * @param string $inspectionId
+     * @param string $selectedRoomId
+     * @param string $itemKey
+     * @param string $itemTitle
+     * @param string $imagePath
+     * @param array|null $result
+     * @return bool
+     */
+    protected function saveInspectionRecord($inspectionId, $selectedRoomId, $itemKey, $itemTitle, $imagePath, $result)
+    {
+        $idRoom = (int) str_replace('room-', '', (string) $selectedRoomId);
+        $roomNum = (string) $selectedRoomId;
+
+        $idEmployee = isset($this->context->employee->id) ? (int) $this->context->employee->id : 0;
+        $employeeName = isset($this->context->employee) ? trim($this->context->employee->firstname . ' ' . $this->context->employee->lastname) : '';
+
+        $width = isset($result['metrics']['width']) ? (int) $result['metrics']['width'] : 0;
+        $height = isset($result['metrics']['height']) ? (int) $result['metrics']['height'] : 0;
+        $luminance = isset($result['metrics']['luminance']) ? (float) $result['metrics']['luminance'] : 0.0;
+        $lumStatus = isset($result['metrics']['luminance_status']) ? pSQL($result['metrics']['luminance_status']) : '';
+        $sharpness = isset($result['metrics']['sharpness_score']) ? (float) $result['metrics']['sharpness_score'] : 0.0;
+        $sharpStatus = isset($result['metrics']['sharpness_status']) ? pSQL($result['metrics']['sharpness_status']) : '';
+        $warnings = (isset($result['warnings']) && is_array($result['warnings'])) ? pSQL(json_encode($result['warnings'])) : '';
+        $assessment = isset($result['assessment']) ? pSQL($result['assessment']) : 'EVIDENCE_REQUIRES_RETAKE';
+
+        $data = [
+            'inspection_id'    => pSQL($inspectionId),
+            'id_room'          => (int) $idRoom,
+            'room_num'         => pSQL($roomNum),
+            'id_employee'      => (int) $idEmployee,
+            'employee_name'    => pSQL($employeeName),
+            'item_key'         => pSQL($itemKey),
+            'item_title'       => pSQL($itemTitle),
+            'image_path'       => pSQL($imagePath),
+            'width'            => (int) $width,
+            'height'           => (int) $height,
+            'luminance'        => (float) $luminance,
+            'luminance_status' => $lumStatus,
+            'sharpness_score'  => (float) $sharpness,
+            'sharpness_status' => $sharpStatus,
+            'warnings'         => $warnings,
+            'assessment'       => $assessment,
+            'date_add'         => date('Y-m-d H:i:s'),
+        ];
+
+        return Db::getInstance()->insert('visual_inspection', $data);
+    }
+
+    /**
+     * Retrieve recent inspection logs for General Manager audit view
+     *
+     * @param int $limit
+     * @return array
+     */
+    protected function getRecentInspections($limit = 30)
+    {
+        $inspections = [];
+
+        try {
+            $sql = 'SELECT * FROM `' . _DB_PREFIX_ . 'visual_inspection`
+                    ORDER BY `id_visual_inspection` DESC
+                    LIMIT ' . (int) $limit;
+
+            $rows = Db::getInstance()->executeS($sql);
+
+            if (!empty($rows)) {
+                foreach ($rows as $row) {
+                    $row['warnings_list'] = !empty($row['warnings']) ? json_decode($row['warnings'], true) : [];
+                    $inspections[] = $row;
+                }
+            }
+        } catch (Exception $e) {
+            PrestaShopLogger::addLog($e->getMessage(), 3);
+        }
+
+        return $inspections;
     }
 
     /**

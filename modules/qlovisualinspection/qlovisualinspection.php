@@ -36,7 +36,7 @@ class QloVisualInspection extends Module
      */
     public function install()
     {
-        return parent::install() && $this->installTab();
+        return parent::install() && $this->installTab() && $this->createTable();
     }
 
     /**
@@ -46,7 +46,53 @@ class QloVisualInspection extends Module
      */
     public function uninstall()
     {
-        return $this->uninstallTab() && parent::uninstall();
+        return $this->uninstallTab() && $this->deleteTable() && parent::uninstall();
+    }
+
+    /**
+     * Create inspection history table
+     *
+     * @return bool
+     */
+    private function createTable()
+    {
+        $sql = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'visual_inspection` (
+            `id_visual_inspection` int(11) NOT NULL AUTO_INCREMENT,
+            `inspection_id` varchar(64) NOT NULL,
+            `id_room` int(11) NOT NULL,
+            `room_num` varchar(64) NOT NULL,
+            `id_employee` int(11) NOT NULL DEFAULT 0,
+            `employee_name` varchar(128) NOT NULL DEFAULT \'\',
+            `item_key` varchar(32) NOT NULL,
+            `item_title` varchar(64) NOT NULL,
+            `image_path` varchar(255) NOT NULL,
+            `width` int(11) NOT NULL DEFAULT 0,
+            `height` int(11) NOT NULL DEFAULT 0,
+            `luminance` decimal(6,2) NOT NULL DEFAULT 0.00,
+            `luminance_status` varchar(32) NOT NULL DEFAULT \'\',
+            `sharpness_score` decimal(8,2) NOT NULL DEFAULT 0.00,
+            `sharpness_status` varchar(32) NOT NULL DEFAULT \'\',
+            `warnings` text,
+            `assessment` varchar(32) NOT NULL DEFAULT \'\',
+            `date_add` datetime NOT NULL,
+            PRIMARY KEY (`id_visual_inspection`),
+            KEY `inspection_id` (`inspection_id`),
+            KEY `id_room` (`id_room`),
+            KEY `assessment` (`assessment`),
+            KEY `date_add` (`date_add`)
+        ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;';
+
+        return (bool) Db::getInstance()->execute($sql);
+    }
+
+    /**
+     * Delete inspection history table on uninstall
+     *
+     * @return bool
+     */
+    private function deleteTable()
+    {
+        return (bool) Db::getInstance()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'visual_inspection`');
     }
 
     /**
