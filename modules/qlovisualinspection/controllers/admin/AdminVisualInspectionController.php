@@ -24,6 +24,24 @@ class AdminVisualInspectionController extends ModuleAdminController
         parent::__construct();
     }
 
+    const INSPECTION_ITEMS = [
+        'bed' => [
+            'field' => 'photo_bed',
+            'title' => '1. Cama e Enxoval',
+            'icon'  => 'icon-bookmark',
+        ],
+        'bath' => [
+            'field' => 'photo_bath',
+            'title' => '2. Banheiro Higienizado',
+            'icon'  => 'icon-tint',
+        ],
+        'amenities' => [
+            'field' => 'photo_amenities',
+            'title' => '3. Amenities Repostos',
+            'icon'  => 'icon-gift',
+        ],
+    ];
+
     /**
      * Main action to render and process the room inspection form
      */
@@ -31,90 +49,107 @@ class AdminVisualInspectionController extends ModuleAdminController
     {
         parent::initContent();
 
-        $metricsData = null;
+        $itemsResults = [];
         $errorMessage = null;
-        $previewImageBase64 = null;
-        $checklistSummary = null;
         $selectedRoomId = null;
+        $overallAssessment = 'EVIDENCE_VALID';
 
         if (Tools::isSubmit('submitInspection')) {
             $selectedRoomId = Tools::getValue('room_id');
-            $chkBed = (bool) Tools::getValue('chk_bed');
-            $chkBath = (bool) Tools::getValue('chk_bath');
-            $chkAmenities = (bool) Tools::getValue('chk_amenities');
+            $allowedMimes = ['image/jpeg', 'image/png', 'image/pjpeg', 'image/x-png'];
+            $hasAnyError = false;
 
-            $checklistSummary = [
-                'bed' => $chkBed,
-                'bath' => $chkBath,
-                'amenities' => $chkAmenities,
-            ];
+            foreach (self::INSPECTION_ITEMS as $itemKey => $itemConfig) {
+                $fieldName = $itemConfig['field'];
+                $itemResult = null;
+                $itemError = null;
+                $previewBase64 = null;
 
-            if (!isset($_FILES['inspection_photo']) || $_FILES['inspection_photo']['error'] !== UPLOAD_ERR_OK) {
-                $errorMessage = $this->l('Por favor, selecione uma foto válida antes de submeter.');
-            } else {
-                $tmpFilePath = $_FILES['inspection_photo']['tmp_name'];
-                $fileSize = (int) $_FILES['inspection_photo']['size'];
-
-                if ($fileSize > self::MAX_FILE_SIZE_BYTES) {
-                    $errorMessage = $this->l('O arquivo excede o limite máximo permitido de 5 MB.');
+                if (!isset($_FILES[$fieldName]) || $_FILES[$fieldName]['error'] !== UPLOAD_ERR_OK) {
+                    $itemError = $this->l('Foto não enviada para este item.');
+                    $hasAnyError = true;
+                    $overallAssessment = 'EVIDENCE_REQUIRES_RETAKE';
                 } else {
-                    $mimeType = function_exists('mime_content_type') ? mime_content_type($tmpFilePath) : $_FILES['inspection_photo']['type'];
-                    $allowedMimes = ['image/jpeg', 'image/png', 'image/pjpeg', 'image/x-png'];
+                    $tmpFilePath = $_FILES[$fieldName]['tmp_name'];
+                    $fileSize = (int) $_FILES[$fieldName]['size'];
 
-                    if (!in_array($mimeType, $allowedMimes)) {
-                        $errorMessage = $this->l('Formato inválido. Apenas imagens JPEG e PNG são aceitas.');
+                    if ($fileSize > self::MAX_FILE_SIZE_BYTES) {
+                        $itemError = $this->l('Foto excede o limite máximo permitido de 5 MB.');
+                        $hasAnyError = true;
+                        $overallAssessment = 'EVIDENCE_REQUIRES_RETAKE';
                     } else {
-                        // Generate Base64 preview for immediate feedback display
-                        $fileData = @file_get_contents($tmpFilePath);
-                        if ($fileData) {
-                            $previewImageBase64 = 'data:' . $mimeType . ';base64,' . base64_encode($fileData);
-                        }
+                        $mimeType = function_exists('mime_content_type') ? mime_content_type($tmpFilePath) : $_FILES[$fieldName]['type'];
 
-                        $inspectionId = 'INSP-' . date('YmdHis') . '-' . preg_replace('/[^a-zA-Z0-9_-]/', '', (string)$selectedRoomId);
-                        $correlationId = Tools::passwdGen(16, 'ALPHANUMERIC');
-
-                        $cFile = new CURLFile($tmpFilePath, $mimeType, $_FILES['inspection_photo']['name']);
-                        $postData = [
-                            'file' => $cFile,
-                            'room_id' => (string) $selectedRoomId,
-                            'inspection_id' => $inspectionId,
-                        ];
-
-                        $ch = curl_init(self::PYTHON_SERVICE_URL);
-                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                        curl_setopt($ch, CURLOPT_POST, true);
-                        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
-                        curl_setopt($ch, CURLOPT_TIMEOUT_MS, self::CURL_TIMEOUT_MS);
-                        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                            'X-Correlation-ID: ' . $correlationId,
-                        ]);
-
-                        $response = curl_exec($ch);
-                        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                        $curlErr = curl_errno($ch);
-                        curl_close($ch);
-
-                        if ($response && $httpCode === 200) {
-                            $metricsData = json_decode($response, true);
-                        } elseif ($httpCode === 400) {
-                            $errJson = json_decode($response, true);
-                            $errorMessage = !empty($errJson['detail']) ? $errJson['detail'] : $this->l('Arquivo de imagem rejeitado pelo validador.');
+                        if (!in_array($mimeType, $allowedMimes)) {
+                            $itemError = $this->l('Formato inválido. Apenas JPEG ou PNG.');
+                            $hasAnyError = true;
+                            $overallAssessment = 'EVIDENCE_REQUIRES_RETAKE';
                         } else {
-                            // Fallback / Contingency if Python microservice is offline or times out (>800ms)
-                            $errorMessage = $this->l('Métricas automáticas indisponíveis (Serviço local offline). Checklist registrado manualmente.');
+                            $fileData = @file_get_contents($tmpFilePath);
+                            if ($fileData) {
+                                $previewBase64 = 'data:' . $mimeType . ';base64,' . base64_encode($fileData);
+                            }
+
+                            $subInspectionId = 'INSP-' . date('YmdHis') . '-' . preg_replace('/[^a-zA-Z0-9_-]/', '', (string)$selectedRoomId) . '-' . $itemKey;
+                            $correlationId = Tools::passwdGen(16, 'ALPHANUMERIC');
+
+                            $cFile = new CURLFile($tmpFilePath, $mimeType, $_FILES[$fieldName]['name']);
+                            $postData = [
+                                'file'          => $cFile,
+                                'room_id'       => (string) $selectedRoomId,
+                                'inspection_id' => $subInspectionId,
+                            ];
+
+                            $ch = curl_init(self::PYTHON_SERVICE_URL);
+                            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                            curl_setopt($ch, CURLOPT_POST, true);
+                            curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+                            curl_setopt($ch, CURLOPT_TIMEOUT_MS, self::CURL_TIMEOUT_MS);
+                            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                                'X-Correlation-ID: ' . $correlationId,
+                            ]);
+
+                            $response = curl_exec($ch);
+                            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                            curl_close($ch);
+
+                            if ($response && $httpCode === 200) {
+                                $itemResult = json_decode($response, true);
+                                if (isset($itemResult['assessment']) && $itemResult['assessment'] !== 'EVIDENCE_VALID') {
+                                    $overallAssessment = 'EVIDENCE_REQUIRES_RETAKE';
+                                }
+                            } elseif ($httpCode === 400) {
+                                $errJson = json_decode($response, true);
+                                $itemError = !empty($errJson['detail']) ? $errJson['detail'] : $this->l('Imagem rejeitada pelo validador.');
+                                $hasAnyError = true;
+                                $overallAssessment = 'EVIDENCE_REQUIRES_RETAKE';
+                            } else {
+                                $itemError = $this->l('Métricas indisponíveis (Serviço local offline).');
+                            }
                         }
                     }
                 }
+
+                $itemsResults[$itemKey] = [
+                    'title'   => $itemConfig['title'],
+                    'icon'    => $itemConfig['icon'],
+                    'preview' => $previewBase64,
+                    'result'  => $itemResult,
+                    'error'   => $itemError,
+                ];
+            }
+
+            if ($hasAnyError) {
+                $errorMessage = $this->l('Uma ou mais evidências fotográficas apresentaram problemas ou necessitam de retake.');
             }
         }
 
         $this->context->smarty->assign([
-            'inspectionResult' => $metricsData,
-            'inspectionError'  => $errorMessage,
-            'previewImage'     => $previewImageBase64,
-            'checklistSummary' => $checklistSummary,
-            'selectedRoomId'   => $selectedRoomId,
-            'roomsList'        => $this->getHotelRoomsList(),
+            'itemsResults'      => $itemsResults,
+            'overallAssessment' => $overallAssessment,
+            'inspectionError'   => $errorMessage,
+            'selectedRoomId'    => $selectedRoomId,
+            'roomsList'         => $this->getHotelRoomsList(),
         ]);
 
         $this->template = 'content.tpl';
