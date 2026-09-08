@@ -243,7 +243,19 @@
                                 {/if}
                             </td>
                             <td>
-                                <strong>{$row.room_num|escape:'html':'UTF-8'}</strong>
+                                <div>
+                                    <strong>{$row.display_room_num|escape:'html':'UTF-8'}</strong>
+                                    {if !empty($row.display_floor)}
+                                        <span class="badge badge-default" style="font-size: 0.75em; font-weight: normal; margin-left: 4px;">
+                                            {l s='Andar' mod='qlovisualinspection'} {$row.display_floor|escape:'html':'UTF-8'}
+                                        </span>
+                                    {/if}
+                                </div>
+                                {if !empty($row.display_room_type)}
+                                    <div class="text-muted" style="max-width: 190px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.85em; cursor: help;" title="{$row.full_room_title|escape:'html':'UTF-8'}">
+                                        {$row.display_room_type|escape:'html':'UTF-8'}
+                                    </div>
+                                {/if}
                             </td>
                             <td>
                                 {$row.item_title|escape:'html':'UTF-8'}

@@ -256,8 +256,18 @@ class AdminVisualInspectionController extends ModuleAdminController
         $inspections = [];
 
         try {
-            $sql = 'SELECT * FROM `' . _DB_PREFIX_ . 'visual_inspection`
-                    ORDER BY `id_visual_inspection` DESC
+            $idLang = (int) (isset($this->context->language->id) ? $this->context->language->id : Configuration::get('PS_LANG_DEFAULT'));
+
+            $sql = 'SELECT vi.*,
+                           r.`room_num` AS physical_room_num,
+                           r.`floor` AS room_floor,
+                           pl.`name` AS room_type_name,
+                           hbil.`hotel_name` AS hotel_name
+                    FROM `' . _DB_PREFIX_ . 'visual_inspection` vi
+                    LEFT JOIN `' . _DB_PREFIX_ . 'htl_room_information` r ON (r.`id` = vi.`id_room`)
+                    LEFT JOIN `' . _DB_PREFIX_ . 'product_lang` pl ON (pl.`id_product` = r.`id_product` AND pl.`id_lang` = ' . (int) $idLang . ')
+                    LEFT JOIN `' . _DB_PREFIX_ . 'htl_branch_info_lang` hbil ON (hbil.`id` = r.`id_hotel` AND hbil.`id_lang` = ' . (int) $idLang . ')
+                    ORDER BY vi.`id_visual_inspection` DESC
                     LIMIT ' . (int) $limit;
 
             $rows = Db::getInstance()->executeS($sql);
@@ -265,6 +275,30 @@ class AdminVisualInspectionController extends ModuleAdminController
             if (!empty($rows)) {
                 foreach ($rows as $row) {
                     $row['warnings_list'] = !empty($row['warnings']) ? json_decode($row['warnings'], true) : [];
+
+                    // Determine user-friendly display name while keeping raw ID intact
+                    if (!empty($row['physical_room_num'])) {
+                        $row['display_room_num'] = $row['physical_room_num'];
+                    } else {
+                        $row['display_room_num'] = !empty($row['room_num']) ? $row['room_num'] : '#' . $row['id_room'];
+                    }
+
+                    $row['display_room_type'] = !empty($row['room_type_name']) ? $row['room_type_name'] : '';
+                    $row['display_floor'] = !empty($row['room_floor']) ? $row['room_floor'] : '';
+
+                    $fullTitleParts = [];
+                    $fullTitleParts[] = $row['display_room_num'];
+                    if (!empty($row['display_room_type'])) {
+                        $fullTitleParts[] = $row['display_room_type'];
+                    }
+                    if (!empty($row['display_floor'])) {
+                        $fullTitleParts[] = '(' . $row['display_floor'] . ')';
+                    }
+                    if (!empty($row['hotel_name'])) {
+                        $fullTitleParts[] = '[' . $row['hotel_name'] . ']';
+                    }
+                    $row['full_room_title'] = implode(' — ', $fullTitleParts);
+
                     $inspections[] = $row;
                 }
             }
@@ -286,16 +320,29 @@ class AdminVisualInspectionController extends ModuleAdminController
 
         try {
             if (class_exists('Db')) {
-                $sql = 'SELECT r.`id` AS id_room, r.`room_num`, r.`id_status`, r.`floor`
+                $idLang = (int) (isset($this->context->language->id) ? $this->context->language->id : Configuration::get('PS_LANG_DEFAULT'));
+
+                $sql = 'SELECT r.`id` AS id_room, r.`room_num`, r.`id_status`, r.`floor`,
+                               pl.`name` AS room_type_name
                         FROM `' . _DB_PREFIX_ . 'htl_room_information` r
+                        LEFT JOIN `' . _DB_PREFIX_ . 'product_lang` pl ON (pl.`id_product` = r.`id_product` AND pl.`id_lang` = ' . (int) $idLang . ')
                         ORDER BY r.`room_num` ASC LIMIT 50';
                 $dbRooms = Db::getInstance()->executeS($sql);
 
                 if (!empty($dbRooms)) {
                     foreach ($dbRooms as $row) {
+                        $nameParts = [];
+                        $nameParts[] = 'Quarto ' . $row['room_num'];
+                        if (!empty($row['room_type_name'])) {
+                            $nameParts[] = '(' . $row['room_type_name'] . ')';
+                        }
+                        if (!empty($row['floor'])) {
+                            $nameParts[] = '- Andar ' . $row['floor'];
+                        }
+
                         $rooms[] = [
                             'id'   => 'room-' . (int) $row['id_room'],
-                            'name' => 'Quarto ' . $row['room_num'] . (!empty($row['floor']) ? ' (Andar ' . $row['floor'] . ')' : ''),
+                            'name' => implode(' ', $nameParts),
                         ];
                     }
                 }
