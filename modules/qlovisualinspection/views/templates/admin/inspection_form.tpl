@@ -204,3 +204,86 @@
         </div>
     {/if}
 </div>
+
+<!-- Fernando's View: Histórico de Auditoria de Inspeções -->
+<div class="panel">
+    <div class="panel-heading">
+        <i class="icon-list-alt"></i> {l s='Histórico de Auditoria de Governança (Auditoria Gerencial)' mod='qlovisualinspection'}
+        {if isset($recentInspections) && $recentInspections|@count > 0}
+            <span class="badge">{$recentInspections|@count} {l s='registros' mod='qlovisualinspection'}</span>
+        {/if}
+    </div>
+
+    {if isset($recentInspections) && $recentInspections|@count > 0}
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover">
+                <thead>
+                    <tr class="nodrag nodrop">
+                        <th class="text-center" style="width: 70px;">{l s='Evidência' mod='qlovisualinspection'}</th>
+                        <th>{l s='Quarto' mod='qlovisualinspection'}</th>
+                        <th>{l s='Item Inspecionado' mod='qlovisualinspection'}</th>
+                        <th class="text-center">{l s='Veredito' mod='qlovisualinspection'}</th>
+                        <th class="text-center">{l s='Luminância' mod='qlovisualinspection'}</th>
+                        <th class="text-center">{l s='Nitidez' mod='qlovisualinspection'}</th>
+                        <th class="text-center">{l s='Dimensões' mod='qlovisualinspection'}</th>
+                        <th>{l s='Auditor / Inspetor' mod='qlovisualinspection'}</th>
+                        <th class="text-center">{l s='Data e Hora' mod='qlovisualinspection'}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {foreach from=$recentInspections item=row}
+                        <tr>
+                            <td class="text-center">
+                                {if !empty($row.image_path)}
+                                    <a href="{$moduleImgUri}{$row.image_path|escape:'html':'UTF-8'}" target="_blank" title="{l s='Ver imagem em tamanho original' mod='qlovisualinspection'}">
+                                        <img src="{$moduleImgUri}{$row.image_path|escape:'html':'UTF-8'}" alt="Thumb" style="width: 45px; height: 35px; object-fit: cover; border-radius: 3px; border: 1px solid #ccc;" />
+                                    </a>
+                                {else}
+                                    <span class="text-muted">—</span>
+                                {/if}
+                            </td>
+                            <td>
+                                <strong>{$row.room_num|escape:'html':'UTF-8'}</strong>
+                            </td>
+                            <td>
+                                {$row.item_title|escape:'html':'UTF-8'}
+                            </td>
+                            <td class="text-center">
+                                {if $row.assessment == 'EVIDENCE_VALID'}
+                                    <span class="badge badge-success">{l s='VÁLIDA' mod='qlovisualinspection'}</span>
+                                {else}
+                                    <span class="badge badge-danger">{l s='RETAKE' mod='qlovisualinspection'}</span>
+                                {/if}
+                            </td>
+                            <td class="text-center">
+                                <strong>{$row.luminance|string_format:"%.1f"}</strong>
+                                <small class="text-muted">({$row.luminance_status|escape:'html':'UTF-8'})</small>
+                            </td>
+                            <td class="text-center">
+                                <strong>{$row.sharpness_score|string_format:"%.1f"}</strong>
+                                <small class="text-muted">({$row.sharpness_status|escape:'html':'UTF-8'})</small>
+                            </td>
+                            <td class="text-center">
+                                {$row.width|intval} &times; {$row.height|intval} px
+                            </td>
+                            <td>
+                                {if !empty($row.employee_name)}
+                                    {$row.employee_name|escape:'html':'UTF-8'}
+                                {else}
+                                    <span class="text-muted">{l s='Supervisor' mod='qlovisualinspection'}</span>
+                                {/if}
+                            </td>
+                            <td class="text-center">
+                                {$row.date_add|date_format:"%d/%m/%Y %H:%M"}
+                            </td>
+                        </tr>
+                    {/foreach}
+                </tbody>
+            </table>
+        </div>
+    {else}
+        <div class="alert alert-info" style="margin: 15px;">
+            <i class="icon-info-circle"></i> {l s='Nenhum registro de inspeção salvo até o momento. As avaliações salvas no formulário acima serão arquivadas nesta tabela para consulta e auditoria.' mod='qlovisualinspection'}
+        </div>
+    {/if}
+</div>
