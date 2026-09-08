@@ -100,14 +100,12 @@ class QloVisualInspection extends Module
      *
      * @return bool
      */
-    private function installTab()
+    public function installTab()
     {
-        $idParent = (int) Tab::getIdFromClassName('AdminParentOrders');
-        if (!$idParent) {
-            $idParent = (int) Tab::getIdFromClassName('AdminOrders');
-        }
-
-        $tab = new Tab();
+        $idParent = (int) Tab::getIdFromClassName('AdminHotelReservationSystemManagement');
+        
+        $idTab = (int) Tab::getIdFromClassName('AdminVisualInspection');
+        $tab = $idTab ? new Tab($idTab) : new Tab();
         $tab->active = 1;
         $tab->class_name = 'AdminVisualInspection';
         $tab->name = array();
@@ -116,7 +114,7 @@ class QloVisualInspection extends Module
         }
         $tab->id_parent = $idParent;
         $tab->module = $this->name;
-        return (bool) $tab->add();
+        return (bool) $tab->save();
     }
 
     /**
