@@ -20,6 +20,7 @@ class AdminVisualInspectionController extends ModuleAdminController
     public function __construct()
     {
         $this->bootstrap = true;
+        $this->override_folder = '';
         parent::__construct();
     }
 
@@ -116,7 +117,9 @@ class AdminVisualInspectionController extends ModuleAdminController
             'roomsList'        => $this->getHotelRoomsList(),
         ]);
 
-        $this->setTemplate('inspection_form.tpl');
+        $this->template = 'content.tpl';
+        $this->content .= $this->context->smarty->fetch($this->getTemplatePath() . 'inspection_form.tpl');
+        $this->context->smarty->assign('content', $this->content);
     }
 
     /**
