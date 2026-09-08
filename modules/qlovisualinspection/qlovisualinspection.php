@@ -24,8 +24,8 @@ class QloVisualInspection extends Module
 
         parent::__construct();
 
-        $this->displayName = $this->l('Inspeção Visual de Quartos');
-        $this->description = $this->l('Métricas objetivas de luminância e nitidez para governança.');
+        $this->displayName = $this->l('Room Visual Inspection');
+        $this->description = $this->l('Objective luminance and sharpness quality assessment metrics for housekeeping governance.');
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
     }
 
@@ -110,7 +110,7 @@ class QloVisualInspection extends Module
         $tab->class_name = 'AdminVisualInspection';
         $tab->name = array();
         foreach (Language::getLanguages(true) as $lang) {
-            $tab->name[$lang['id_lang']] = 'Inspeção de Quartos';
+            $tab->name[$lang['id_lang']] = 'Room Inspection';
         }
         $tab->id_parent = $idParent;
         $tab->module = $this->name;

@@ -27,17 +27,17 @@ class AdminVisualInspectionController extends ModuleAdminController
     const INSPECTION_ITEMS = [
         'bed' => [
             'field' => 'photo_bed',
-            'title' => '1. Cama e Enxoval',
+            'title' => '1. Bed & Linen',
             'icon'  => 'icon-bookmark',
         ],
         'bath' => [
             'field' => 'photo_bath',
-            'title' => '2. Banheiro Higienizado',
+            'title' => '2. Sanitized Bathroom',
             'icon'  => 'icon-tint',
         ],
         'amenities' => [
             'field' => 'photo_amenities',
-            'title' => '3. Amenities Repostos',
+            'title' => '3. Replenished Amenities',
             'icon'  => 'icon-gift',
         ],
     ];
@@ -66,7 +66,7 @@ class AdminVisualInspectionController extends ModuleAdminController
                 $previewBase64 = null;
 
                 if (!isset($_FILES[$fieldName]) || $_FILES[$fieldName]['error'] !== UPLOAD_ERR_OK) {
-                    $itemError = $this->l('Foto não enviada para este item.');
+                    $itemError = $this->l('Photo not provided for this item.');
                     $hasAnyError = true;
                     $overallAssessment = 'EVIDENCE_REQUIRES_RETAKE';
                 } else {
@@ -74,14 +74,14 @@ class AdminVisualInspectionController extends ModuleAdminController
                     $fileSize = (int) $_FILES[$fieldName]['size'];
 
                     if ($fileSize > self::MAX_FILE_SIZE_BYTES) {
-                        $itemError = $this->l('Foto excede o limite máximo permitido de 5 MB.');
+                        $itemError = $this->l('Photo exceeds the maximum allowed size of 5 MB.');
                         $hasAnyError = true;
                         $overallAssessment = 'EVIDENCE_REQUIRES_RETAKE';
                     } else {
                         $mimeType = function_exists('mime_content_type') ? mime_content_type($tmpFilePath) : $_FILES[$fieldName]['type'];
 
                         if (!in_array($mimeType, $allowedMimes)) {
-                            $itemError = $this->l('Formato inválido. Apenas JPEG ou PNG.');
+                            $itemError = $this->l('Invalid format. Only JPEG or PNG images are allowed.');
                             $hasAnyError = true;
                             $overallAssessment = 'EVIDENCE_REQUIRES_RETAKE';
                         } else {
@@ -120,11 +120,11 @@ class AdminVisualInspectionController extends ModuleAdminController
                                 }
                             } elseif ($httpCode === 400) {
                                 $errJson = json_decode($response, true);
-                                $itemError = !empty($errJson['detail']) ? $errJson['detail'] : $this->l('Imagem rejeitada pelo validador.');
+                                $itemError = !empty($errJson['detail']) ? $errJson['detail'] : $this->l('Image rejected by quality evaluator.');
                                 $hasAnyError = true;
                                 $overallAssessment = 'EVIDENCE_REQUIRES_RETAKE';
                             } else {
-                                $itemError = $this->l('Métricas indisponíveis (Serviço local offline).');
+                                $itemError = $this->l('Automated metrics unavailable (Local inspection service offline).');
                             }
 
                             // Save evidence file permanently and persist in database
@@ -151,7 +151,7 @@ class AdminVisualInspectionController extends ModuleAdminController
             }
 
             if ($hasAnyError) {
-                $errorMessage = $this->l('Uma ou mais evidências fotográficas apresentaram problemas ou necessitam de retake.');
+                $errorMessage = $this->l('One or more photo evidences failed quality checks or require a retake.');
             }
         }
 
@@ -332,12 +332,12 @@ class AdminVisualInspectionController extends ModuleAdminController
                 if (!empty($dbRooms)) {
                     foreach ($dbRooms as $row) {
                         $nameParts = [];
-                        $nameParts[] = 'Quarto ' . $row['room_num'];
+                        $nameParts[] = 'Room ' . $row['room_num'];
                         if (!empty($row['room_type_name'])) {
                             $nameParts[] = '(' . $row['room_type_name'] . ')';
                         }
                         if (!empty($row['floor'])) {
-                            $nameParts[] = '- Andar ' . $row['floor'];
+                            $nameParts[] = '- Floor ' . $row['floor'];
                         }
 
                         $rooms[] = [
@@ -353,10 +353,10 @@ class AdminVisualInspectionController extends ModuleAdminController
 
         if (empty($rooms)) {
             $rooms = [
-                ['id' => 'room-101', 'name' => 'Quarto 101 (Standard)'],
-                ['id' => 'room-102', 'name' => 'Quarto 102 (Deluxe)'],
-                ['id' => 'room-201', 'name' => 'Quarto 201 (Suíte Presidencial)'],
-                ['id' => 'room-202', 'name' => 'Quarto 202 (Executivo)'],
+                ['id' => 'room-101', 'name' => 'Room 101 (Standard)'],
+                ['id' => 'room-102', 'name' => 'Room 102 (Deluxe)'],
+                ['id' => 'room-201', 'name' => 'Room 201 (Presidential Suite)'],
+                ['id' => 'room-202', 'name' => 'Room 202 (Executive)'],
             ];
         }
 

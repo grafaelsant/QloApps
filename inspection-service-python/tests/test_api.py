@@ -75,7 +75,7 @@ def test_post_corrupt_text_file_as_image():
     assert response.headers.get("content-type") == "application/problem+json"
     body = response.json()
     assert body["status"] == 400
-    assert body["title"] == "Arquivo de Imagem Inválido"
+    assert body["title"] == "Invalid Image File"
     assert body["instance"] == "/v1/visual-inspections"
 
 def test_post_empty_file():
@@ -88,4 +88,4 @@ def test_post_empty_file():
 
     assert response.status_code == 400
     body = response.json()
-    assert body["title"] == "Arquivo Vazio"
+    assert body["title"] == "Empty File"

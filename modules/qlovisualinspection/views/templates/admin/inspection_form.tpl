@@ -1,6 +1,6 @@
 <div class="panel">
     <div class="panel-heading">
-        <i class="icon-camera"></i> {l s='Inspeção Visual e Evidências Fotográficas de Governança' mod='qlovisualinspection'}
+        <i class="icon-camera"></i> {l s='Visual Inspection & Housekeeping Photo Evidences' mod='qlovisualinspection'}
     </div>
 
     {if isset($inspectionError) && $inspectionError}
@@ -12,7 +12,7 @@
     <form method="post" action="" enctype="multipart/form-data" class="form-horizontal">
         <div class="form-group">
             <label class="control-label col-lg-3 required">
-                {l s='Quarto Inspecionado:' mod='qlovisualinspection'}
+                {l s='Inspected Room:' mod='qlovisualinspection'}
             </label>
             <div class="col-lg-5">
                 <select name="room_id" class="form-control" required>
@@ -29,48 +29,48 @@
 
         <div class="form-group">
             <label class="control-label col-lg-3">
-                <strong>{l s='Evidências por Item:' mod='qlovisualinspection'}</strong>
+                <strong>{l s='Evidence per Checklist Item:' mod='qlovisualinspection'}</strong>
             </label>
             <div class="col-lg-8">
                 <p class="text-muted" style="margin-bottom: 15px;">
-                    {l s='Envie uma foto clara e nítida para cada um dos itens obrigatórios do quarto (JPEG/PNG, máx. 5 MB por foto).' mod='qlovisualinspection'}
+                    {l s='Upload a clear, sharp photo for each required room item (JPEG/PNG, max 5 MB per photo).' mod='qlovisualinspection'}
                 </p>
 
                 <div class="row">
-                    <!-- Item 1: Cama e Enxoval -->
+                    <!-- Item 1: Bed & Linen -->
                     <div class="col-md-4">
                         <div class="panel panel-default">
                             <div class="panel-heading" style="font-size: 0.95em; font-weight: bold;">
-                                <i class="icon-bookmark"></i> 1. {l s='Cama e Enxoval' mod='qlovisualinspection'} <span class="text-danger">*</span>
+                                <i class="icon-bookmark"></i> 1. {l s='Bed & Linen' mod='qlovisualinspection'} <span class="text-danger">*</span>
                             </div>
                             <div class="panel-body">
-                                <p class="small text-muted">{l s='Cama arrumada, lençóis esticados e travesseiros alinhados.' mod='qlovisualinspection'}</p>
+                                <p class="small text-muted">{l s='Made bed, straightened sheets, and aligned pillows.' mod='qlovisualinspection'}</p>
                                 <input type="file" name="photo_bed" accept="image/jpeg,image/png" class="form-control" required />
                             </div>
                         </div>
                     </div>
 
-                    <!-- Item 2: Banheiro Higienizado -->
+                    <!-- Item 2: Sanitized Bathroom -->
                     <div class="col-md-4">
                         <div class="panel panel-default">
                             <div class="panel-heading" style="font-size: 0.95em; font-weight: bold;">
-                                <i class="icon-tint"></i> 2. {l s='Banheiro Higienizado' mod='qlovisualinspection'} <span class="text-danger">*</span>
+                                <i class="icon-tint"></i> 2. {l s='Sanitized Bathroom' mod='qlovisualinspection'} <span class="text-danger">*</span>
                             </div>
                             <div class="panel-body">
-                                <p class="small text-muted">{l s='Bancada limpa, espelho sem marcas e toalhas dobradas.' mod='qlovisualinspection'}</p>
+                                <p class="small text-muted">{l s='Clean countertop, streak-free mirror, and folded towels.' mod='qlovisualinspection'}</p>
                                 <input type="file" name="photo_bath" accept="image/jpeg,image/png" class="form-control" required />
                             </div>
                         </div>
                     </div>
 
-                    <!-- Item 3: Amenities Repostos -->
+                    <!-- Item 3: Replenished Amenities -->
                     <div class="col-md-4">
                         <div class="panel panel-default">
                             <div class="panel-heading" style="font-size: 0.95em; font-weight: bold;">
-                                <i class="icon-gift"></i> 3. {l s='Amenities Repostos' mod='qlovisualinspection'} <span class="text-danger">*</span>
+                                <i class="icon-gift"></i> 3. {l s='Replenished Amenities' mod='qlovisualinspection'} <span class="text-danger">*</span>
                             </div>
                             <div class="panel-body">
-                                <p class="small text-muted">{l s='Sabonetes, shampoos e itens de cortesia organizados.' mod='qlovisualinspection'}</p>
+                                <p class="small text-muted">{l s='Arranged soaps, shampoos, and complimentary toiletries.' mod='qlovisualinspection'}</p>
                                 <input type="file" name="photo_amenities" accept="image/jpeg,image/png" class="form-control" required />
                             </div>
                         </div>
@@ -82,7 +82,7 @@
         <div class="form-group">
             <div class="col-lg-8 col-lg-offset-3">
                 <button type="submit" name="submitInspection" class="btn btn-primary btn-lg">
-                    <i class="icon-upload"></i> {l s='Avaliar e Salvar Evidências' mod='qlovisualinspection'}
+                    <i class="icon-upload"></i> {l s='Save Evidences' mod='qlovisualinspection'}
                 </button>
             </div>
         </div>
@@ -94,17 +94,17 @@
         <!-- Master Room Verdict Banner -->
         <div class="alert {if $overallAssessment == 'EVIDENCE_VALID'}alert-success{else}alert-danger{/if}" style="font-size: 1.15em;">
             <i class="{if $overallAssessment == 'EVIDENCE_VALID'}icon-check-circle{else}icon-exclamation-triangle{/if}"></i>
-            <strong>{l s='Resultado Global da Inspeção:' mod='qlovisualinspection'}</strong>
+            <strong>{l s='Overall Inspection Result:' mod='qlovisualinspection'}</strong>
             {if $overallAssessment == 'EVIDENCE_VALID'}
                 <span class="label label-success" style="font-size: 0.9em; margin-left: 10px; padding: 4px 10px;">
-                    {l s='TODAS AS EVIDÊNCIAS VÁLIDAS' mod='qlovisualinspection'}
+                    {l s='ALL EVIDENCES VALID' mod='qlovisualinspection'}
                 </span>
-                <span style="margin-left: 10px;">{l s='O quarto atende aos critérios objetivos de qualidade e conformidade fotográfica.' mod='qlovisualinspection'}</span>
+                <span style="margin-left: 10px;">{l s='The room meets objective quality standards and photographic compliance.' mod='qlovisualinspection'}</span>
             {else}
                 <span class="label label-danger" style="font-size: 0.9em; margin-left: 10px; padding: 4px 10px;">
-                    {l s='REFAZER FOTOS COM NÃO CONFORMIDADE' mod='qlovisualinspection'}
+                    {l s='RETAKE NON-COMPLIANT PHOTOS' mod='qlovisualinspection'}
                 </span>
-                <span style="margin-left: 10px;">{l s='Um ou mais itens não atingiram os limiares mínimos de nitidez ou luminosidade.' mod='qlovisualinspection'}</span>
+                <span style="margin-left: 10px;">{l s='One or more items did not meet minimum sharpness or lighting thresholds.' mod='qlovisualinspection'}</span>
             {/if}
         </div>
 
@@ -117,11 +117,11 @@
                             <i class="{$itemData.icon|escape:'html':'UTF-8'}"></i> {$itemData.title|escape:'html':'UTF-8'}
                             <span class="pull-right">
                                 {if isset($itemData.result.assessment) && $itemData.result.assessment == 'EVIDENCE_VALID'}
-                                    <span class="badge badge-success">{l s='VÁLIDA' mod='qlovisualinspection'}</span>
+                                    <span class="badge badge-success">{l s='VALID' mod='qlovisualinspection'}</span>
                                 {elseif isset($itemData.result.assessment)}
                                     <span class="badge badge-danger">{l s='RETAKE' mod='qlovisualinspection'}</span>
                                 {else}
-                                    <span class="badge badge-warning">{l s='SEM MÉTRICAS' mod='qlovisualinspection'}</span>
+                                    <span class="badge badge-warning">{l s='NO METRICS' mod='qlovisualinspection'}</span>
                                 {/if}
                             </span>
                         </div>
@@ -136,28 +136,28 @@
                                 <div class="row" style="margin-top: 10px;">
                                     <div class="col-xs-6" style="padding: 2px;">
                                         <div class="well well-sm" style="margin-bottom: 5px; background: #fff;">
-                                            <div class="text-muted"><small>{l s='Brilho' mod='qlovisualinspection'}</small></div>
+                                            <div class="text-muted"><small>{l s='Luminance' mod='qlovisualinspection'}</small></div>
                                             <strong>{$itemData.result.metrics.luminance|string_format:"%.1f"}</strong>
                                             <div>
                                                 {if $itemData.result.metrics.luminance_status == 'OPTIMAL'}
-                                                    <span class="label label-success">{l s='Ideal' mod='qlovisualinspection'}</span>
+                                                    <span class="label label-success">{l s='Optimal' mod='qlovisualinspection'}</span>
                                                 {elseif $itemData.result.metrics.luminance_status == 'UNDEREXPOSED'}
-                                                    <span class="label label-danger">{l s='Escura' mod='qlovisualinspection'}</span>
+                                                    <span class="label label-danger">{l s='Underexposed' mod='qlovisualinspection'}</span>
                                                 {else}
-                                                    <span class="label label-warning">{l s='Estourada' mod='qlovisualinspection'}</span>
+                                                    <span class="label label-warning">{l s='Overexposed' mod='qlovisualinspection'}</span>
                                                 {/if}
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-xs-6" style="padding: 2px;">
                                         <div class="well well-sm" style="margin-bottom: 5px; background: #fff;">
-                                            <div class="text-muted"><small>{l s='Nitidez' mod='qlovisualinspection'}</small></div>
+                                            <div class="text-muted"><small>{l s='Sharpness' mod='qlovisualinspection'}</small></div>
                                             <strong>{$itemData.result.metrics.sharpness_score|string_format:"%.1f"}</strong>
                                             <div>
                                                 {if $itemData.result.metrics.sharpness_status == 'SHARP'}
-                                                    <span class="label label-success">{l s='Nítida' mod='qlovisualinspection'}</span>
+                                                    <span class="label label-success">{l s='Sharp' mod='qlovisualinspection'}</span>
                                                 {else}
-                                                    <span class="label label-danger">{l s='Desfocada' mod='qlovisualinspection'}</span>
+                                                    <span class="label label-danger">{l s='Blurry' mod='qlovisualinspection'}</span>
                                                 {/if}
                                             </div>
                                         </div>
@@ -171,19 +171,19 @@
                                 {if isset($itemData.result.warnings) && $itemData.result.warnings|@count > 0}
                                     <div class="text-left" style="margin-top: 8px; margin-bottom: 0; padding: 6px 10px; font-size: 0.82em; background-color: #fdf2f2; border: 1px solid #f8d7da; border-left: 3px solid #d9534f; border-radius: 3px; color: #a94442;">
                                         <div style="font-weight: bold; margin-bottom: 3px;">
-                                            <i class="icon-warning-sign"></i> {l s='Ajustes necessários:' mod='qlovisualinspection'}
+                                            <i class="icon-warning-sign"></i> {l s='Required adjustments:' mod='qlovisualinspection'}
                                         </div>
                                         <ul style="padding-left: 15px; margin-bottom: 0;">
                                             {foreach from=$itemData.result.warnings item=warn}
                                                 <li>
                                                     {if $warn == 'LOW_RESOLUTION'}
-                                                        {l s='Resolução insuficiente (mín. 800x600).' mod='qlovisualinspection'}
+                                                        {l s='Insufficient resolution (min. 800x600 px).' mod='qlovisualinspection'}
                                                     {elseif $warn == 'UNDEREXPOSED'}
-                                                        {l s='Foto muito escura. Acenda as luzes.' mod='qlovisualinspection'}
+                                                        {l s='Photo is too dark. Turn on room lights.' mod='qlovisualinspection'}
                                                     {elseif $warn == 'OVEREXPOSED'}
-                                                        {l s='Foto com excesso de luz.' mod='qlovisualinspection'}
+                                                        {l s='Photo is overexposed to light.' mod='qlovisualinspection'}
                                                     {elseif $warn == 'BLURRY_IMAGE'}
-                                                        {l s='Foto desfocada ou tremida.' mod='qlovisualinspection'}
+                                                        {l s='Photo is blurry or shaky.' mod='qlovisualinspection'}
                                                     {else}
                                                         {$warn|escape:'html':'UTF-8'}
                                                     {/if}
@@ -208,9 +208,9 @@
 <!-- Fernando's View: Histórico de Auditoria de Inspeções -->
 <div class="panel">
     <div class="panel-heading">
-        <i class="icon-list-alt"></i> {l s='Histórico de Auditoria de Governança (Auditoria Gerencial)' mod='qlovisualinspection'}
+        <i class="icon-list-alt"></i> {l s='Housekeeping Governance Audit Trail (Manager View)' mod='qlovisualinspection'}
         {if isset($recentInspections) && $recentInspections|@count > 0}
-            <span class="badge">{$recentInspections|@count} {l s='registros' mod='qlovisualinspection'}</span>
+            <span class="badge">{$recentInspections|@count} {l s='records' mod='qlovisualinspection'}</span>
         {/if}
     </div>
 
@@ -219,15 +219,15 @@
             <table class="table table-bordered table-striped table-hover">
                 <thead>
                     <tr class="nodrag nodrop">
-                        <th class="text-center" style="width: 70px;">{l s='Evidência' mod='qlovisualinspection'}</th>
-                        <th>{l s='Quarto' mod='qlovisualinspection'}</th>
-                        <th>{l s='Item Inspecionado' mod='qlovisualinspection'}</th>
-                        <th class="text-center">{l s='Veredito' mod='qlovisualinspection'}</th>
-                        <th class="text-center">{l s='Luminância' mod='qlovisualinspection'}</th>
-                        <th class="text-center">{l s='Nitidez' mod='qlovisualinspection'}</th>
-                        <th class="text-center">{l s='Dimensões' mod='qlovisualinspection'}</th>
-                        <th>{l s='Auditor / Inspetor' mod='qlovisualinspection'}</th>
-                        <th class="text-center">{l s='Data e Hora' mod='qlovisualinspection'}</th>
+                        <th class="text-center" style="width: 70px;">{l s='Evidence' mod='qlovisualinspection'}</th>
+                        <th>{l s='Room' mod='qlovisualinspection'}</th>
+                        <th>{l s='Inspected Item' mod='qlovisualinspection'}</th>
+                        <th class="text-center">{l s='Verdict' mod='qlovisualinspection'}</th>
+                        <th class="text-center">{l s='Luminance' mod='qlovisualinspection'}</th>
+                        <th class="text-center">{l s='Sharpness' mod='qlovisualinspection'}</th>
+                        <th class="text-center">{l s='Dimensions' mod='qlovisualinspection'}</th>
+                        <th>{l s='Auditor / Inspector' mod='qlovisualinspection'}</th>
+                        <th class="text-center">{l s='Date & Time' mod='qlovisualinspection'}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -235,7 +235,7 @@
                         <tr>
                             <td class="text-center">
                                 {if !empty($row.image_path)}
-                                    <a href="{$moduleImgUri}{$row.image_path|escape:'html':'UTF-8'}" target="_blank" title="{l s='Ver imagem em tamanho original' mod='qlovisualinspection'}">
+                                    <a href="{$moduleImgUri}{$row.image_path|escape:'html':'UTF-8'}" target="_blank" title="{l s='View original size' mod='qlovisualinspection'}">
                                         <img src="{$moduleImgUri}{$row.image_path|escape:'html':'UTF-8'}" alt="Thumb" style="width: 45px; height: 35px; object-fit: cover; border-radius: 3px; border: 1px solid #ccc;" />
                                     </a>
                                 {else}
@@ -247,7 +247,7 @@
                                     <strong>{$row.display_room_num|escape:'html':'UTF-8'}</strong>
                                     {if !empty($row.display_floor)}
                                         <span class="badge badge-default" style="font-size: 0.75em; font-weight: normal; margin-left: 4px;">
-                                            {l s='Andar' mod='qlovisualinspection'} {$row.display_floor|escape:'html':'UTF-8'}
+                                            {l s='Floor' mod='qlovisualinspection'} {$row.display_floor|escape:'html':'UTF-8'}
                                         </span>
                                     {/if}
                                 </div>
@@ -262,7 +262,7 @@
                             </td>
                             <td class="text-center">
                                 {if $row.assessment == 'EVIDENCE_VALID'}
-                                    <span class="badge badge-success">{l s='VÁLIDA' mod='qlovisualinspection'}</span>
+                                    <span class="badge badge-success">{l s='VALID' mod='qlovisualinspection'}</span>
                                 {else}
                                     <span class="badge badge-danger">{l s='RETAKE' mod='qlovisualinspection'}</span>
                                 {/if}
@@ -295,7 +295,7 @@
         </div>
     {else}
         <div class="alert alert-info" style="margin: 15px;">
-            <i class="icon-info-circle"></i> {l s='Nenhum registro de inspeção salvo até o momento. As avaliações salvas no formulário acima serão arquivadas nesta tabela para consulta e auditoria.' mod='qlovisualinspection'}
+            <i class="icon-info-circle"></i> {l s='No inspection records saved yet. Submitted evaluations will appear here for management auditing.' mod='qlovisualinspection'}
         </div>
     {/if}
 </div>

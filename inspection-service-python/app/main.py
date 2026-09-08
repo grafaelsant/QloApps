@@ -67,8 +67,8 @@ async def create_visual_inspection(
         if not contents:
             return rfc7807_error_response(
                 status_code=400,
-                title="Arquivo Vazio",
-                detail="O arquivo enviado está vazio.",
+                title="Empty File",
+                detail="The uploaded file is empty.",
             )
 
         # Attempt to open and verify image integrity
@@ -78,8 +78,8 @@ async def create_visual_inspection(
         except (UnidentifiedImageError, OSError, ValueError) as exc:
             return rfc7807_error_response(
                 status_code=400,
-                title="Arquivo de Imagem Inválido",
-                detail="O arquivo enviado não pôde ser decodificado como uma imagem válida.",
+                title="Invalid Image File",
+                detail="The uploaded file could not be decoded as a valid image.",
             )
 
         # Evaluate quality metrics
@@ -132,8 +132,8 @@ async def create_visual_inspection(
 
         return rfc7807_error_response(
             status_code=500,
-            title="Erro Interno no Processamento",
-            detail=f"Ocorreu um erro interno ao analisar a imagem. Entre em contato com o suporte",
+            title="Internal Processing Error",
+            detail="An internal error occurred while analyzing the image. Please contact support.",
         )
 
 
