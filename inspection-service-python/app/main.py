@@ -15,6 +15,7 @@ from PIL import Image, UnidentifiedImageError
 import uvicorn
 
 from app.analyzer import evaluate_image
+from app.schemas import VisualInspectionResponse, ProblemDetails, HealthzResponse
 
 # Configure standard logger to output structured JSON
 logger = logging.getLogger("visual_inspection")
@@ -41,13 +42,26 @@ def rfc7807_error_response(status_code: int, title: str, detail: str, instance: 
     )
 
 
-@app.get("/healthz")
+@app.get("/healthz", response_model=HealthzResponse)
 async def health_check():
     """Health check endpoint."""
     return {"status": "UP"}
 
 
-@app.post("/v1/visual-inspections")
+@app.post(
+    "/v1/visual-inspections",
+    response_model=VisualInspectionResponse,
+    responses={
+        400: {
+            "model": ProblemDetails,
+            "description": "Invalid image file or empty payload (RFC 7807)",
+        },
+        500: {
+            "model": ProblemDetails,
+            "description": "Internal server or processing error (RFC 7807)",
+        },
+    },
+)
 async def create_visual_inspection(
     file: UploadFile = File(...),
     room_id: str = Form(...),
