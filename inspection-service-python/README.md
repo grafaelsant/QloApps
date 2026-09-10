@@ -53,3 +53,36 @@ curl -s -X POST http://127.0.0.1:8102/v1/visual-inspections \
   -F "room_id=room-101" \
   -F "inspection_id=INSP-2026-001" | jq .
 ```
+
+---
+
+## Testes de Mutação (Mutation Testing com `mutmut`)
+
+O projeto está configurado via `setup.cfg` para rodar testes de mutação direcionados ao módulo `app/analyzer.py`:
+
+### 1. Executar os testes de mutação
+```bash
+./.venv/bin/mutmut run
+```
+
+### 2. Ver o resumo dos mutantes sobreviventes
+```bash
+./.venv/bin/mutmut results
+```
+
+### 3. Visualizar o diff das mutações sobreviventes no terminal
+```bash
+# Exibir o diff de todos os mutantes sobreviventes
+./.venv/bin/mutmut show survived
+
+# Exibir o diff de um mutante específico
+./.venv/bin/mutmut show app.analyzer.x_validate_dimensions__mutmut_2
+```
+
+### 4. Navegar interativamente via terminal (TUI)
+Para navegar visualmente pelos mutantes em um terminal interativo:
+```bash
+./.venv/bin/mutmut browse
+```
+*(Use as setas para navegar, `Enter` para inspecionar e `q` para sair)*
+

@@ -266,3 +266,6 @@ modules/qlovisualinspection/views/img/inspections/*
 .coverage.*
 htmlcov/
 coverage.xml
+
+mutants
+
