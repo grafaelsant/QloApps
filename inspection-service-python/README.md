@@ -21,9 +21,14 @@ pip install -r requirements.txt
 python tests/generate_fixtures.py
 ```
 
-### 3. Execução dos Testes Automatizados (Unitários, API e BDD)
+### 3. Execução dos Testes Automatizados com Cobertura (pytest-cov)
 ```bash
-PYTHONPATH=. pytest tests/ -v
+PYTHONPATH=. pytest
+```
+Para visualizar o relatório HTML gerado pelo `pytest-cov`:
+```bash
+# O relatório interativo é gerado em htmlcov/index.html
+xdg-open htmlcov/index.html # ou abra no seu navegador
 ```
 
 ### 4. Inicialização do Servidor HTTP (Porta 8102)
