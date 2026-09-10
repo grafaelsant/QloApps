@@ -86,3 +86,22 @@ Para navegar visualmente pelos mutantes em um terminal interativo:
 ```
 *(Use as setas para navegar, `Enter` para inspecionar e `q` para sair)*
 
+---
+
+## Testes de Fuzzing (Fuzz Testing no `analyzer.py` e Pipeline)
+
+O projeto conta com duas camadas complementares de Fuzzing:
+
+### 1. Fuzzing Baseado em Propriedades e Invariantes (`pytest -m fuzz`)
+Testa exaustivamente o `analyzer.py` sob espaços de cores exóticos (`RGB`, `RGBA`, `L`, `1`, `P`, `CMYK`, `YCbCr`, `HSV`), geometrias extremas/limítrofes (1x1, 2x2, cortes de 1px), ruídos arbitrários de bytes e números de ponto flutuante extremos:
+```bash
+./.venv/bin/pytest -m fuzz -v
+```
+
+### 2. Harness de Mutação de Bytes (`tests/fuzz_harness.py`)
+Gera mutações aleatórias em streams binários JPEG/PNG (bit flips, deleção/inserção de bytes, truncamento) para garantir que decodificadores e avaliadores não causem memory leaks, crashes não tratados ou exceções inesperadas:
+```bash
+# Executa 2.000 iterações de fuzzing com semente reproduzível
+./.venv/bin/python tests/fuzz_harness.py --iterations 2000 --seed 42
+```
+
